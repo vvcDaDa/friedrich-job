@@ -214,10 +214,10 @@ Mini.tea = () => Mini.run({
       const ok = c.o.base === sel.base && c.o.top === sel.top && c.o.ice === sel.ice;
       if (ok) {
         combo++; best = Math.max(best, combo);
-        const tip = Math.round(8 * c.p / c.max) + Math.min(combo - 1, 5) * 2;
-        earn += 14 + tip; tips += tip; served++;
+        const tip = Math.round(6 * c.p / c.max) + Math.min(combo - 1, 5);
+        earn += 12 + tip; tips += tip; served++;
         SFX.coin();
-        api.floatAt(cupEl, `+¥${14 + tip}`, '#7dffb0');
+        api.floatAt(cupEl, `+¥${12 + tip}`, '#7dffb0');
       } else {
         combo = 0; wrong++;
         SFX.bad();
@@ -266,9 +266,9 @@ Mini.tea = () => Mini.run({
       result() {
         const total = served + wrong + missed;
         return {
-          earn: 120 + earn,
+          earn: 100 + earn,
           quality: total ? served / total * Math.min(1, served / 8) : 0,
-          lines: [`底薪 ¥120 · 提成与小费 ¥${earn}`, `完成 ${served} 杯（最高连击 ${best}）`, `做错 ${wrong} 杯 · 等跑 ${missed} 位顾客`],
+          lines: [`底薪 ¥100 · 提成与小费 ¥${earn}`, `完成 ${served} 杯（最高连击 ${best}）`, `做错 ${wrong} 杯 · 等跑 ${missed} 位顾客`],
           stat: { served }
         };
       },
@@ -353,11 +353,11 @@ Mini.flyer = () => Mini.run({
         });
       },
       result() {
-        const bonus = given >= 30 ? 50 : 0;
+        const bonus = given >= 30 ? 40 : 0;
         return {
-          earn: Math.max(40, 80 + given * 6 + bonus - guardHits * 10),
+          earn: Math.max(40, 70 + given * 5 + bonus - guardHits * 10),
           quality: clamp(given / 30, 0, 1) * (annoyed > 3 ? .8 : 1),
-          lines: [`底薪 ¥80 · 每张 ¥6 · 共发出 ${given} 张`, bonus ? '🎯 达成目标奖励 ¥50' : '未达到 30 张目标', `招人烦 ${annoyed} 次 · 被保安赶 ${guardHits} 次${guardHits ? `（扣 ¥${guardHits * 10}）` : ''}`],
+          lines: [`底薪 ¥70 · 每张 ¥5 · 共发出 ${given} 张`, bonus ? '🎯 达成目标奖励 ¥40' : '未达到 30 张目标', `招人烦 ${annoyed} 次 · 被保安赶 ${guardHits} 次${guardHits ? `（扣 ¥${guardHits * 10}）` : ''}`],
           moodAdj: -annoyed
         };
       }
@@ -442,8 +442,8 @@ Mini.cashier = () => Mini.run({
         if (phase !== 'wait') return;
         SFX.coin();
         q('.pos-paid').innerHTML = '✅ 支付成功';
-        qr++; earn += 10; updScore();
-        api.floatAt(q('.pos'), '+¥10', '#7dffb0');
+        qr++; earn += 8; updScore();
+        api.floatAt(q('.pos'), '+¥8', '#7dffb0');
         next();
         return;
       }
@@ -471,7 +471,7 @@ Mini.cashier = () => Mini.run({
       const sum = tray.reduce((a, b) => a + b, 0);
       if (sum === cust.need) {
         combo++; ok++;
-        const g = 20 + Math.min(combo - 1, 5) * 2;
+        const g = 18 + Math.min(combo - 1, 5) * 2;
         earn += g;
         SFX.good();
         q('.cb-say').textContent = pick(['谢谢！', '辛苦啦～', '晚安！', '👍']);
@@ -498,9 +498,9 @@ Mini.cashier = () => Mini.run({
       result() {
         const tot = ok + qr + bad;
         return {
-          earn: Math.max(100, 180 + earn - deduct),
+          earn: Math.max(100, 160 + earn - deduct),
           quality: tot ? (ok + qr) / tot * Math.min(1, (ok + qr) / 8) : 0,
-          lines: [`夜班底薪 ¥180 · 提成 ¥${earn}`, `服务顾客 ${ok + qr} 位（现金 ${ok} · 扫码 ${qr}）`, `找错 ${bad} 次${deduct ? ` · 赔钱 ¥${deduct}` : ''}`]
+          lines: [`夜班底薪 ¥160 · 提成 ¥${earn}`, `服务顾客 ${ok + qr} 位（现金 ${ok} · 扫码 ${qr}）`, `找错 ${bad} 次${deduct ? ` · 赔钱 ¥${deduct}` : ''}`]
         };
       },
       cleanup() { phase = 'over'; }
@@ -570,7 +570,7 @@ Mini.delivery = () => Mini.run({
       </div>`;
     const sc = $('.scooter', area), scE = $('.scooter span', area);
     const pos = { x: 4, y: 4 };
-    let orders = [], oid = 0, spawnT = 0, delivered = 0, late = 0, earn = 0, penalty = 0, fast = 0;
+    let orders = [], oid = 0, spawnT = 0.5, delivered = 0, late = 0, earn = 0, penalty = 0, fast = 0;
     const held = [];
     let moveCd = 0;
     const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -595,7 +595,9 @@ Mini.delivery = () => Mini.run({
     function spawnOrder() {
       const r = pick(rests);
       const used = orders.map(o => o.home);
-      const h = pick(homes.filter(x => !used.includes(x)));
+      const free = homes.filter(x => !used.includes(x));
+      const far = free.filter(x => dist(r, x) >= 6);
+      const h = pick(far.length ? far : free);
       const d = dist(pos, r) + dist(r, h);
       const max = Math.round(14 + d * 0.9);
       orders.push({ id: ++oid, rest: r, home: h, state: 'wait', t: max, max, color: colors[oid % colors.length] });
@@ -610,7 +612,7 @@ Mini.delivery = () => Mini.run({
           api.floatAt(sc, '取餐！', '#ffd166');
         } else if (o.state === 'carry' && adj(o.home)) {
           o.state = 'done'; ch = true; delivered++;
-          const g = 30 + Math.round(20 * o.t / o.max);
+          const g = 16 + Math.round(8 * o.t / o.max);
           if (o.t / o.max > .5) fast++;
           earn += g; SFX.coin();
           api.floatAt(sc, `+¥${g}`, '#7dffb0');
@@ -664,7 +666,8 @@ Mini.delivery = () => Mini.run({
           if (moveCd <= 0) { tryMove(held[held.length - 1]); moveCd = 0.13; }
         }
         spawnT -= dt;
-        if ((orders.length < 2 && spawnT < 7) || (orders.length < 3 && spawnT <= 0)) { spawnOrder(); spawnT = 9; }
+        // 平台派单有固定节奏：每 7 秒最多来一单，手再快也刷不出更多单
+        if (spawnT <= 0 && orders.length < 3) { spawnOrder(); spawnT = 7; }
         let lost = false;
         orders.forEach(o => { o.t -= dt; if (o.t <= 0) { o.state = 'late'; lost = true; } });
         if (lost) {
@@ -678,9 +681,9 @@ Mini.delivery = () => Mini.run({
       },
       result() {
         return {
-          earn: Math.max(0, earn - penalty),
-          quality: (delivered + late) ? delivered / (delivered + late) * Math.min(1, delivered / 7) : 0,
-          lines: [`送达 ${delivered} 单（${fast} 单极速送达）`, `配送收入 ¥${earn}`, `超时 ${late} 单${penalty ? ` · 罚款 ¥${penalty}` : ''}`],
+          earn: Math.max(30, 40 + earn - penalty),
+          quality: (delivered + late) ? delivered / (delivered + late) * Math.min(1, delivered / 9) : 0,
+          lines: [`站点保底 ¥40 · 送达 ${delivered} 单（${fast} 单极速送达）`, `配送收入 ¥${earn}`, `超时 ${late} 单${penalty ? ` · 罚款 ¥${penalty}` : ''}`],
           stat: { late }
         };
       },
@@ -707,7 +710,7 @@ Mini.tutor = () => Mini.run({
   howto: [
     '小宇念出一个德语单词，选出正确的中文意思',
     '答得又快又准，小宇会越学越开心',
-    '每连续答对 5 题，王阿姨额外加 ¥10',
+    '每连续答对 5 题，王阿姨额外加 ¥8',
     '键盘：<kbd>1</kbd>-<kbd>4</kbd> 选择答案'
   ],
   create(area, api) {
@@ -738,7 +741,7 @@ Mini.tutor = () => Mini.run({
         b.classList.add('right'); SFX.coin();
         $('.tu-face', area).textContent = streak >= 5 ? '🤩' : '😄';
         $('.tu-say', area).textContent = pick(['懂了！', `${cur[0]}！`, '老师好厉害', 'Ja！']);
-        if (streak % 5 === 0) { bonus += 10; api.floatAt(b, '连对 5 题 +¥10', '#ffcc4d'); SFX.good(); }
+        if (streak % 5 === 0) { bonus += 8; api.floatAt(b, '连对 5 题 +¥8', '#ffcc4d'); SFX.good(); }
       } else {
         wrongN++; streak = 0;
         b.classList.add('wrong'); SFX.bad();
@@ -756,9 +759,9 @@ Mini.tutor = () => Mini.run({
     return {
       result() {
         return {
-          earn: 200 + right * 12 + bonus,
+          earn: 180 + right * 10 + bonus,
           quality: (right + wrongN) ? right / (right + wrongN) * Math.min(1, right / 15) : 0,
-          lines: [`课时费 ¥200 · 答对 ${right} 题 × ¥12`, bonus ? `连对奖励 ¥${bonus}` : '没有拿到连对奖励', `答错 ${wrongN} 题`]
+          lines: [`课时费 ¥180 · 答对 ${right} 题 × ¥10`, bonus ? `连对奖励 ¥${bonus}` : '没有拿到连对奖励', `答错 ${wrongN} 题`]
         };
       },
       cleanup() { window.removeEventListener('keydown', onKey); }

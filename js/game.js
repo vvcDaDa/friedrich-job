@@ -4,11 +4,11 @@ const RENT_DAY = 7;
 const SAVE_KEY = 'fj_save_v1';
 
 const JOBS = {
-  tea:      { name: '奶茶店店员', icon: '🧋', slots: [0, 1], energy: 25, mood: -4, auto: 210, range: '¥200-450', play: () => Mini.tea(), desc: '按单做奶茶，手快有小费' },
-  flyer:    { name: '街头发传单', icon: '📄', slots: [0],    energy: 18, mood: -6, auto: 140, range: '¥120-310', play: () => Mini.flyer(), desc: '不累，但看人脸色' },
-  cashier:  { name: '便利店夜班', icon: '🏪', slots: [1],    energy: 35, mood: -6, auto: 260, range: '¥240-420', play: () => Mini.cashier(), desc: '扫码收银，算准找零' },
-  delivery: { name: '外卖骑手',   icon: '🛵', slots: [0, 1], energy: 32, mood: -3, auto: 240, range: '¥200-450', play: () => Mini.delivery(), desc: '风里雨里，准时必达' },
-  tutor:    { name: '德语家教',   icon: '📚', slots: [1],    energy: 15, mood: +4, auto: 300, range: '¥300-480', play: () => Mini.tutor(), desc: '专业对口，最体面的一份' }
+  tea:      { name: '奶茶店店员', icon: '🧋', slots: [0, 1], energy: 25, mood: -4, auto: 190, range: '¥180-380', play: () => Mini.tea(), desc: '按单做奶茶，手快有小费' },
+  flyer:    { name: '街头发传单', icon: '📄', slots: [0],    energy: 18, mood: -6, auto: 125, range: '¥110-260', play: () => Mini.flyer(), desc: '不累，但看人脸色' },
+  cashier:  { name: '便利店夜班', icon: '🏪', slots: [1],    energy: 35, mood: -6, auto: 235, range: '¥200-380', play: () => Mini.cashier(), desc: '扫码收银，算准找零' },
+  delivery: { name: '外卖骑手',   icon: '🛵', slots: [0, 1], energy: 32, mood: -3, auto: 200, range: '¥150-350', play: () => Mini.delivery(), desc: '风里雨里，准时必达' },
+  tutor:    { name: '德语家教',   icon: '📚', slots: [1],    energy: 15, mood: +4, auto: 270, range: '¥260-420', play: () => Mini.tutor(), desc: '专业对口，最体面的一份' }
 };
 const SLOT_NAME = ['白天', '晚上'];
 
