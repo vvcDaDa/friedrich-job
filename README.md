@@ -18,13 +18,6 @@
 python3 -m http.server 8000
 ```
 
-然后打开 http://localhost:8000 （直接双击 `index.html` 也能玩）。
-
-## 部署到 GitHub Pages
-
-1. 新建一个 GitHub 仓库，把本目录全部文件上传（包括 `.nojekyll`）。
-2. 仓库 **Settings → Pages**，Source 选择 **Deploy from a branch**，分支选 `main`，目录选 `/ (root)`。
-3. 等待一两分钟，访问 `https://<你的用户名>.github.io/<仓库名>/`。
 
 ## 目录结构
 
