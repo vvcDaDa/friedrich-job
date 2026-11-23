@@ -206,7 +206,7 @@ const Prologue = (() => {
     Music.play('night');
     await wait(400);
     await narr('这是 Friedrich。');
-    await think('……大学学的是德语，外教给我起了这个名字，后来大家就一直这么叫了。', 'normal');
+    await think('……这是大学外教给我起的名字，后来大家就一直这么叫了。', 'normal');
     await narr('毕业三个月，投了四十多份简历，至今没有一个回音。');
     await narr('银行卡里的 ¥12,860，是他大学四年打零工攒下的全部积蓄。');
     await think('下周就要交房租了……再找不到工作就麻烦了。', 'worried');
@@ -325,9 +325,9 @@ const Prologue = (() => {
     await screen(`
       <div class="loan">
         <div class="loan-brand">⚡ 速借宝</div>
-        <div class="loan-card"><small>最高可借（元）</small><b>6,000</b><span>日息低至 0.05% · 秒到账</span></div>
+        <div class="loan-card"><small>最高可借（元）</small><b>5,000</b><span>日息低至 0.05% · 秒到账</span></div>
         <ul class="loan-list"><li>✔ 无需征信</li><li>✔ 3 分钟审批</li><li>✔ 14 天随借随还</li></ul>
-        <div class="loan-fine">借款即视为同意《服务协议》：到期应还 ¥7,200（含平台服务费 ¥1,200）</div>
+        <div class="loan-fine">借款即视为同意《服务协议》：到期应还 ¥6,200（含平台服务费 ¥1,200）</div>
         <button class="btn loan-btn">立即借款</button>
       </div>`, (s, done) => {
       $('.loan-btn', s).onclick = async e => {
@@ -341,16 +341,16 @@ const Prologue = (() => {
         done();
       };
     });
-    await banner('工商银行', '您尾号 2281 账户入账 ¥6,000.00，余额 ¥9,135.00', '🏦');
-    setBalance(9135);
+    await banner('工商银行', '您尾号 2281 账户入账 ¥5,000.00，余额 ¥8,135.00', '🏦');
+    setBalance(8135);
     await transfer(5000, '商户结算中心', '保证金');
-    setBalance(4135);
-    await recv('保证金已到账。<br>❗ 系统检测到您的账户存在<b>异常流水</b>，已被冻结，需缴纳<b>解冻金 ¥3,800</b>。', { ...JIE, delay: 1500 });
+    setBalance(3135);
+    await recv('保证金已到账。<br>❗ 系统检测到您的账户存在<b>异常流水</b>，已被冻结，需缴纳<b>解冻金 ¥2,800</b>。', { ...JIE, delay: 1500 });
     await think('又要钱……？', 'shock');
     await recv('最后一步了亲！解冻后 <b>¥22,000</b> 立即到账～', JIE);
     await think('已经投进去这么多了……就差这一步了……', 'worried');
     await choose(['（转账）']);
-    await transfer(3800, '商户结算中心', '解冻金');
+    await transfer(2800, '商户结算中心', '解冻金');
     setBalance(335);
     await recv('提现处理中，请耐心等待…', { ...JIE, delay: 900 });
 
@@ -375,9 +375,9 @@ const Prologue = (() => {
     phoneShow(false);
     setBalance(335);
     await card('那天晚上，Friedrich 一夜没睡。', 1900);
-    await narr('被骗走的钱：¥18,525。其中 ¥6,000 是借来的网贷。');
+    await narr('被骗走的钱：¥17,525。其中 ¥5,000 是借来的网贷。');
     await narr('现在，他卡里只剩 ¥335。');
-    await narr('7 天后要交房租 ¥2,000；14 天后，「速借宝」要还 ¥7,200。');
+    await narr('7 天后要交房租 ¥2,300；14 天后，「速借宝」要还 ¥6,200。');
     const reported = await guard(modal({
       title: '天亮了。Friedrich 决定——',
       ava: Art.avatar('sad'),
@@ -421,8 +421,8 @@ const Prologue = (() => {
             <div class="recap-tip">📞 遇到可疑情况，拨打 <b>96110</b> 反诈专线；被骗后第一时间拨打 <b>110</b> 报警并保留证据。</div>
             <div class="recap-state">
               <div><small>余额</small><b>¥335</b></div>
-              <div><small>房租 · 第 7 天</small><b>¥2,000</b></div>
-              <div><small>速借宝 · 第 14 天</small><b>¥7,200</b></div>
+              <div><small>房租 · 第 7 天</small><b>¥2,300</b></div>
+              <div><small>速借宝 · 第 14 天</small><b>¥6,200</b></div>
             </div>
             <button class="btn primary big">开始打工 →</button>
           </div>

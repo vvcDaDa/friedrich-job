@@ -86,7 +86,7 @@ const Events = {
     async policeLoan(S) {
       await modal({
         title: '📞 派出所来电', ava: Art.npc('👮', '#9ec5ff'),
-        body: `<p>“小伙子，你说的那个「速借宝」我们查了，<b>涉嫌违规放贷</b>。”</p><p>“所谓 ¥1,200「服务费」不受法律保护，你只需要归还实际到手的本金 <b>¥6,000</b>。”</p>`,
+        body: `<p>“小伙子，你说的那个「速借宝」我们查了，<b>涉嫌违规放贷</b>。”</p><p>“所谓 ¥1,200「服务费」不受法律保护，你只需要归还实际到手的本金 <b>¥5,000</b>。”</p>`,
         buttons: [{ text: '太好了！', cls: 'primary' }]
       });
       S.loan = Math.max(0, S.loan - 1200);
@@ -96,21 +96,21 @@ const Events = {
     async policeRecover(S) {
       await modal({
         title: '📞 好消息', ava: Art.npc('👮', '#9ec5ff'),
-        body: `<p>“警方打掉了一个刷单诈骗团伙，追回了一部分赃款。”</p><p>“按比例，返还给你 <b>¥1,000</b>。证据保存得好，帮了大忙。”</p>`,
+        body: `<p>“警方打掉了一个刷单诈骗团伙，追回了一部分赃款。”</p><p>“按比例，返还给你 <b>¥800</b>。证据保存得好，帮了大忙。”</p>`,
         buttons: [{ text: '谢谢警察同志！', cls: 'primary' }]
       });
-      Game.money(+1000, '追回赃款');
+      Game.money(+800, '追回赃款');
       Game.mood(+20);
     },
     async tutorUnlock(S) {
       await modal({
         title: '邻居王阿姨', ava: Art.npc('👩‍🦳', '#c49bff'),
-        body: `<p>“小伙子，听说你是学德语的？我家小宇明年要去德国读书。”</p><p>“单日的晚上能不能来教他一会儿？课时费好商量！”</p>`,
+        body: `<p>“小伙子，听说你英语特别好？我家小宇今年要考初中，英语老拖后腿。”</p><p>“单日的晚上能不能来教他一会儿？课时费好商量！”</p>`,
         buttons: [{ text: '当然可以！', cls: 'primary' }]
       });
       S.unlocked.tutor = true;
       Game.mood(+8);
-      Game.log('📚 解锁了「德语家教」');
+      Game.log('📚 解锁了「英语家教」');
     },
     async recoveryScam(S) {
       const v = await modal({
@@ -231,7 +231,7 @@ const Events = {
       else { S.energy = clamp(S.energy - 20, 0, 100); Game.mood(-5); toast('体力 -20', 'bad'); }
     },
     async review(S) {
-      await modal({ title: '⭐ 好评', ava: Art.avatar('happy'), body: '<p>有顾客在平台上给 Friedrich 写了好评：「小哥人超好，还会说德语！」</p><p>老板发来了 <b>¥50</b> 红包。</p>', buttons: [{ text: '开心！', cls: 'primary' }] });
+      await modal({ title: '⭐ 好评', ava: Art.avatar('happy'), body: '<p>有顾客在平台上给 Friedrich 写了好评：「小哥人超好，英语还特别好！」</p><p>老板发来了 <b>¥50</b> 红包。</p>', buttons: [{ text: '开心！', cls: 'primary' }] });
       Game.money(+50, '好评红包');
       Game.mood(+8);
     },

@@ -714,3 +714,9 @@ b { font-weight: 700; }
   .end-stats { grid-template-columns: repeat(2, 1fr); }
   .badges { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* 外卖高峰期 */
+.deliv.rush .map { border-color: #ff9f43; box-shadow: 0 0 0 3px #ff9f4355, 0 0 30px #ff7a5966; animation: rushGlow 1s infinite alternate; }
+@keyframes rushGlow { to { box-shadow: 0 0 0 3px #ff9f4388, 0 0 46px #ff7a59aa; } }
+.deliv.rush .orders::before { content: '🔥 午高峰 · 每单 +¥2'; display: block; text-align: center; font-weight: 900; color: #ffb347; font-size: 13px; padding: 4px; border-radius: 8px; background: #ff9f4322; }
+.ord.wait .o-bar i, .ord.carry .o-bar i { transition: width .2s linear; }

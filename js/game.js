@@ -7,8 +7,8 @@ const JOBS = {
   tea:      { name: '奶茶店店员', icon: '🧋', slots: [0, 1], energy: 28, mood: -4, auto: 190, range: '¥180-380', play: () => Mini.tea(), desc: '按单做奶茶，手快有小费' },
   flyer:    { name: '街头发传单', icon: '📄', slots: [0],    energy: 20, mood: -6, auto: 125, range: '¥110-260', play: () => Mini.flyer(), desc: '不累，但看人脸色' },
   cashier:  { name: '便利店夜班', icon: '🏪', slots: [1],    energy: 38, mood: -6, auto: 235, range: '¥200-380', play: () => Mini.cashier(), desc: '扫码收银，算准找零' },
-  delivery: { name: '外卖骑手',   icon: '🛵', slots: [0, 1], energy: 35, mood: -3, auto: 200, range: '¥150-350', play: () => Mini.delivery(), desc: '风里雨里，准时必达' },
-  tutor:    { name: '德语家教',   icon: '📚', slots: [1],    energy: 20, mood: +4, auto: 270, range: '¥260-420', play: () => Mini.tutor(), desc: '专业对口，单日晚上有课' }
+  delivery: { name: '外卖骑手',   icon: '🛵', slots: [0, 1], energy: 35, mood: -3, auto: 180, range: '¥120-350', play: () => Mini.delivery(), desc: '单多钱少，一刻不停' },
+  tutor:    { name: '英语家教',   icon: '📚', slots: [1],    energy: 20, mood: +4, auto: 270, range: '¥260-420', play: () => Mini.tutor(), desc: '英语是强项，单日晚上有课' }
 };
 const SLOT_NAME = ['白天', '晚上'];
 
@@ -18,7 +18,7 @@ const Game = {
   /* ---------- 状态 ---------- */
   fresh(reported) {
     return {
-      day: 1, slot: 0, money: 335, loan: 7200, rent: 2000, rentPaid: false, rentLate: false,
+      day: 1, slot: 0, money: 335, loan: 6200, rent: 2300, rentPaid: false, rentLate: false,
       energy: 80, mood: 40, reported,
       unlocked: { tea: true, flyer: true, cashier: false, delivery: false, tutor: false },
       skill: { tea: 0, flyer: 0, cashier: 0, delivery: 0, tutor: 0 },
@@ -51,7 +51,7 @@ const Game = {
         <div class="title-in">
           <div class="title-ava">${Art.avatar('determined')}</div>
           <h1>Friedrich <span>打工记</span></h1>
-          <p class="title-sub">被骗走 ¥18,525 之后的十四天</p>
+          <p class="title-sub">被骗走 ¥17,525 之后的十四天</p>
           <div class="title-btns">
             <button class="btn primary big" data-a="new">${has ? '重新开始' : '开始游戏'}</button>
             ${has ? '<button class="btn big" data-a="cont">继续游戏</button>' : ''}
@@ -101,7 +101,7 @@ const Game = {
       await modal({
         title: '第 1 天', ava: Art.avatar('determined'),
         body: `<p>Friedrich 在招聘软件上找到了附近奶茶店和传单派发的兼职。</p>
-          <p>🎯 <b>目标</b>：第 ${RENT_DAY} 天交房租 ¥2,000，第 ${MAX_DAY} 天还清「速借宝」。</p>
+          <p>🎯 <b>目标</b>：第 ${RENT_DAY} 天交房租 ¥2,300，第 ${MAX_DAY} 天还清「速借宝」。</p>
           <p>☀️ 每天有 <b>白天</b> 和 <b>晚上</b> 两个时段，可以打工、休息或出去散心。</p>
           <p>⚡ 打工消耗体力；😊 心情太差会影响收入。认真干（玩小游戏）赚得更多，也可以选择「随便干干」直接跳过。</p>`,
         buttons: [{ text: '开干！', cls: 'primary' }]
@@ -117,7 +117,7 @@ const Game = {
     } else if (S.day === MAX_DAY) {
       toast('⚠️ 最后一天！今晚「速借宝」就要扣款了', 'warn');
     } else if (S.day === RENT_DAY && !S.rentPaid) {
-      toast('🏠 今晚要交房租 ¥2,000', 'warn');
+      toast('🏠 今晚要交房租 ¥2,300', 'warn');
     }
   },
 
@@ -304,7 +304,7 @@ const Game = {
       opts.push({ text: `一次还清网贷 ${yuan(S.loan)}`, value: 'all', disabled: S.money < S.loan });
     }
     opts.push({ text: '取消', value: null, cls: 'ghost' });
-    const v = await modal({ title: '💳 提前还款', body: `<p>当前余额 <b>${yuan(S.money)}</b>。提前还款能让 Friedrich 安心一点（心情 +4）。</p><p class="hint">记得留些钱吃饭（每晚 ¥60）。</p>`, buttons: opts });
+    const v = await modal({ title: '💳 提前还款', body: `<p>当前余额 <b>${yuan(S.money)}</b>。提前还款能让 Friedrich 安心一点（心情 +4）。</p><p class="hint">记得留些钱吃饭（每晚 ¥70）。</p>`, buttons: opts });
     if (!v) return;
     if (v === 'rent') { this.money(-S.rent, '交房租'); S.rentPaid = true; }
     else {
@@ -327,8 +327,8 @@ const Game = {
   async night() {
     const S = this.S;
     Music.play('night');
-    const food = S.money >= 60;
-    if (food) this.money(-60, '吃饭');
+    const food = S.money >= 70;
+    if (food) this.money(-70, '吃饭');
     else this.mood(-10);
     S.energy = clamp(S.energy + 35, 0, 100);
     if (S.loan > 0) this.mood(-2);
@@ -340,7 +340,7 @@ const Game = {
           <div><small>今日支出</small><b class="neg">-${yuan(S.today.spend)}</b></div>
           <div><small>当前余额</small><b>${yuan(S.money)}</b></div>
         </div>
-        <p class="hint">${food ? '🍚 吃饭交通 ¥60' : '😣 钱不够，饿着肚子睡了（心情 -10）'} · 🛏️ 睡了一觉，体力 +35</p>`,
+        <p class="hint">${food ? '🍚 吃饭交通 ¥70' : '😣 钱不够，饿着肚子睡了（心情 -10）'} · 🛏️ 睡了一觉，体力 +35</p>`,
       buttons: [{ text: '继续', cls: 'primary' }]
     });
 
@@ -378,7 +378,7 @@ const Game = {
       S.rentLate = true;
       this.mood(-12);
     } else {
-      const pay = Math.max(0, S.money - 60);
+      const pay = Math.max(0, S.money - 70);
       await modal({ title: '🏠 搬家', ava: Art.avatar('sad'), body: `<p>房租还是没凑齐。Friedrich 交出了手头的 ${yuan(pay)}，抱着行李搬到了阿明的沙发上。</p><p>“没事，挤挤就好。”阿明拍了拍他。</p>`, buttons: [{ text: '……', cls: 'primary' }] });
       this.money(-pay, '部分房租');
       S.rentPaid = true;

@@ -511,12 +511,27 @@ Mini.cashier = () => Mini.run({
 /* ---------------------------------------------------------------
    4. 外卖骑手
 --------------------------------------------------------------- */
+/* 外卖参数：用自动寻路机器人实测校准——机器人（反应远超人类）一个班 20-36 单 ≈ ¥250-420，熟练玩家约 ¥200-280 */
+const DELIV = {
+  interval: 3.0,     // 平常每隔几秒派一单
+  rushInterval: 2.0, // 高峰期派单间隔
+  rushFrom: 30, rushTo: 65, // 高峰期时间段（秒）
+  maxActive: 5,      // 同时最多挂几单
+  pay: 8,            // 每单基础配送费
+  speedBonus: 3,     // 极速送达最多额外奖励
+  rushBonus: 2,      // 高峰补贴
+  timeBase: 9, timePer: 0.75, // 每单时限 = timeBase + 距离 × timePer
+  penalty: 5,        // 超时罚款
+  floor: 60          // 站点保底
+};
+
 Mini.delivery = () => Mini.run({
   title: '外卖骑手', icon: '🛵', color: '#ffd166', duration: 90,
   howto: [
     '用 <kbd>方向键</kbd> / <kbd>WASD</kbd> 或屏幕方向键骑车',
     '骑到 <b>餐厅旁边</b> 自动取餐，再骑到 <b>同颜色标记的楼</b> 旁边送达',
-    '越快送达奖励越多，超时会被扣钱',
+    '单子一个接一个来，每单钱不多，<b>超时还要罚款</b>——规划好路线，顺路多带几单',
+    '中途会进入 <b>🔥 午高峰</b>：派单更快，每单有高峰补贴',
     '🚧 施工路段无法通行'
   ],
   create(area, api) {
@@ -570,7 +585,7 @@ Mini.delivery = () => Mini.run({
       </div>`;
     const sc = $('.scooter', area), scE = $('.scooter span', area);
     const pos = { x: 4, y: 4 };
-    let orders = [], oid = 0, spawnT = 0.5, delivered = 0, late = 0, earn = 0, penalty = 0, fast = 0;
+    let rush = false, orders = [], oid = 0, spawnT = 0.5, delivered = 0, late = 0, earn = 0, penalty = 0, fast = 0;
     const held = [];
     let moveCd = 0;
     const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -599,8 +614,8 @@ Mini.delivery = () => Mini.run({
       const far = free.filter(x => dist(r, x) >= 6);
       const h = pick(far.length ? far : free);
       const d = dist(pos, r) + dist(r, h);
-      const max = Math.round(14 + d * 0.9);
-      orders.push({ id: ++oid, rest: r, home: h, state: 'wait', t: max, max, color: colors[oid % colors.length] });
+      const max = Math.round(DELIV.timeBase + d * DELIV.timePer);
+      orders.push({ id: ++oid, rest: r, home: h, state: 'wait', t: max, max, rush, color: colors[oid % colors.length] });
       SFX.msg();
       renderMarks(); renderOrders();
     }
@@ -612,7 +627,7 @@ Mini.delivery = () => Mini.run({
           api.floatAt(sc, '取餐！', '#ffd166');
         } else if (o.state === 'carry' && adj(o.home)) {
           o.state = 'done'; ch = true; delivered++;
-          const g = 16 + Math.round(8 * o.t / o.max);
+          const g = DELIV.pay + Math.round(DELIV.speedBonus * o.t / o.max) + (o.rush ? DELIV.rushBonus : 0);
           if (o.t / o.max > .5) fast++;
           earn += g; SFX.coin();
           api.floatAt(sc, `+¥${g}`, '#7dffb0');
@@ -660,30 +675,40 @@ Mini.delivery = () => Mini.run({
     place(); renderOrders(); updScore();
 
     return {
-      tick(dt) {
+      tick(dt, t) {
         if (held.length) {
           moveCd -= dt;
           if (moveCd <= 0) { tryMove(held[held.length - 1]); moveCd = 0.13; }
         }
         spawnT -= dt;
-        // 平台派单有固定节奏：每 7 秒最多来一单，手再快也刷不出更多单
-        if (spawnT <= 0 && orders.length < 3) { spawnOrder(); spawnT = 7; }
+        // 平台按固定节奏派单（高峰期更快），挂单满了就不再派
+        const nowRush = t >= DELIV.rushFrom && t < DELIV.rushTo;
+        if (nowRush !== rush) {
+          rush = nowRush;
+          area.querySelector('.deliv').classList.toggle('rush', rush);
+          api.float(rush ? '🔥 午高峰来了！' : '高峰结束，喘口气', area.clientWidth / 2, 40, rush ? '#ffb347' : '#9fe');
+          if (rush) SFX.alarm();
+        }
+        if (spawnT <= 0) {
+          if (orders.length < DELIV.maxActive) spawnOrder();
+          spawnT = rush ? DELIV.rushInterval : DELIV.interval;
+        }
         let lost = false;
         orders.forEach(o => { o.t -= dt; if (o.t <= 0) { o.state = 'late'; lost = true; } });
         if (lost) {
           const n = orders.filter(o => o.state === 'late').length;
-          late += n; penalty += 10 * n;
+          late += n; penalty += DELIV.penalty * n;
           orders = orders.filter(o => o.state !== 'late');
           SFX.bad();
-          api.float('⏰ 超时！-¥10', 120, 30, '#ff6b81');
+          api.float(`⏰ 超时！-¥${DELIV.penalty * n}`, 120, 30, '#ff6b81');
           renderMarks(); renderOrders(); updScore();
         } else updBars();
       },
       result() {
         return {
-          earn: Math.max(30, 40 + earn - penalty),
-          quality: (delivered + late) ? delivered / (delivered + late) * Math.min(1, delivered / 9) : 0,
-          lines: [`站点保底 ¥40 · 送达 ${delivered} 单（${fast} 单极速送达）`, `配送收入 ¥${earn}`, `超时 ${late} 单${penalty ? ` · 罚款 ¥${penalty}` : ''}`],
+          earn: Math.max(DELIV.floor, DELIV.floor + earn - penalty),
+          quality: (delivered + late) ? delivered / (delivered + late) * Math.min(1, delivered / 18) : 0,
+          lines: [`站点保底 ¥${DELIV.floor} · 送达 ${delivered} 单（${fast} 单极速送达）`, `配送收入 ¥${earn}`, `超时 ${late} 单${penalty ? ` · 罚款 ¥${penalty}` : ''}`],
           stat: { late }
         };
       },
@@ -693,22 +718,23 @@ Mini.delivery = () => Mini.run({
 });
 
 /* ---------------------------------------------------------------
-   5. 德语家教
+   5. 英语家教
 --------------------------------------------------------------- */
 const WORDS = [
-  ['Hallo', '你好'], ['Danke', '谢谢'], ['Apfel', '苹果'], ['Hund', '狗'], ['Katze', '猫'], ['Haus', '房子'],
-  ['Buch', '书'], ['Schule', '学校'], ['Wasser', '水'], ['Brot', '面包'], ['Freund', '朋友'], ['Arbeit', '工作'],
-  ['Geld', '钱'], ['Zeit', '时间'], ['Nacht', '夜晚'], ['Stadt', '城市'], ['Zug', '火车'], ['Milch', '牛奶'],
-  ['Tee', '茶'], ['groß', '大的'], ['klein', '小的'], ['schnell', '快的'], ['müde', '累的'], ['glücklich', '幸福的'],
-  ['Vorsicht', '小心'], ['Betrug', '诈骗'], ['Polizei', '警察'], ['Hilfe', '帮助'], ['Mutter', '妈妈'], ['Vater', '爸爸'],
-  ['Sonne', '太阳'], ['Regen', '雨'], ['Schnee', '雪'], ['Herz', '心'], ['lernen', '学习'], ['essen', '吃'],
-  ['trinken', '喝'], ['schlafen', '睡觉'], ['Hoffnung', '希望'], ['Morgen', '早晨'], ['Fahrrad', '自行车'], ['Tür', '门']
+  ['apple', '苹果'], ['library', '图书馆'], ['weather', '天气'], ['kitchen', '厨房'], ['bridge', '桥'], ['island', '岛屿'],
+  ['money', '钱'], ['salary', '工资'], ['rent', '房租'], ['debt', '债务'], ['loan', '贷款'], ['bank', '银行'],
+  ['fraud', '诈骗'], ['police', '警察'], ['careful', '小心的'], ['honest', '诚实的'], ['brave', '勇敢的'], ['tired', '累的'],
+  ['hungry', '饿的'], ['delicious', '美味的'], ['busy', '忙碌的'], ['quiet', '安静的'], ['dangerous', '危险的'], ['important', '重要的'],
+  ['hope', '希望'], ['dream', '梦想'], ['future', '未来'], ['friend', '朋友'], ['family', '家人'], ['neighbor', '邻居'],
+  ['teacher', '老师'], ['student', '学生'], ['customer', '顾客'], ['delivery', '外卖/配送'], ['receipt', '收据'], ['change', '零钱'],
+  ['umbrella', '雨伞'], ['subway', '地铁'], ['breakfast', '早餐'], ['medicine', '药'], ['promise', '承诺'], ['mistake', '错误'],
+  ['borrow', '借入'], ['return', '归还'], ['believe', '相信'], ['refuse', '拒绝'], ['report', '举报/报告'], ['protect', '保护']
 ];
 
 Mini.tutor = () => Mini.run({
-  title: '德语家教', icon: '📚', color: '#c49bff', duration: 60,
+  title: '英语家教', icon: '📚', color: '#c49bff', duration: 60,
   howto: [
-    '小宇念出一个德语单词，选出正确的中文意思',
+    '小宇念出一个英语单词，选出正确的中文意思',
     '答得又快又准，小宇会越学越开心',
     '每连续答对 5 题，王阿姨额外加 ¥8',
     '键盘：<kbd>1</kbd>-<kbd>4</kbd> 选择答案'
@@ -740,7 +766,7 @@ Mini.tutor = () => Mini.run({
         right++; streak++;
         b.classList.add('right'); SFX.coin();
         $('.tu-face', area).textContent = streak >= 5 ? '🤩' : '😄';
-        $('.tu-say', area).textContent = pick(['懂了！', `${cur[0]}！`, '老师好厉害', 'Ja！']);
+        $('.tu-say', area).textContent = pick(['懂了！', `${cur[0]}！`, '老师好厉害', 'Yes！']);
         if (streak % 5 === 0) { bonus += 8; api.floatAt(b, '连对 5 题 +¥8', '#ffcc4d'); SFX.good(); }
       } else {
         wrongN++; streak = 0;
