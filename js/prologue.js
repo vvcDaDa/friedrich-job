@@ -377,7 +377,7 @@ const Prologue = (() => {
     await card('那天晚上，Friedrich 一夜没睡。', 1900);
     await narr('被骗走的钱：¥18,525。其中 ¥6,000 是借来的网贷。');
     await narr('现在，他卡里只剩 ¥335。');
-    await narr('7 天后要交房租 ¥1,500；14 天后，「速借宝」要还 ¥7,200。');
+    await narr('7 天后要交房租 ¥2,000；14 天后，「速借宝」要还 ¥7,200。');
     const reported = await guard(modal({
       title: '天亮了。Friedrich 决定——',
       ava: Art.avatar('sad'),
@@ -421,7 +421,7 @@ const Prologue = (() => {
             <div class="recap-tip">📞 遇到可疑情况，拨打 <b>96110</b> 反诈专线；被骗后第一时间拨打 <b>110</b> 报警并保留证据。</div>
             <div class="recap-state">
               <div><small>余额</small><b>¥335</b></div>
-              <div><small>房租 · 第 7 天</small><b>¥1,500</b></div>
+              <div><small>房租 · 第 7 天</small><b>¥2,000</b></div>
               <div><small>速借宝 · 第 14 天</small><b>¥7,200</b></div>
             </div>
             <button class="btn primary big">开始打工 →</button>

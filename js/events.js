@@ -72,10 +72,10 @@ const Events = {
       if (v === 'truth') {
         await modal({
           title: '妈妈', ava: Art.npc('👩', '#ff9fb2'),
-          body: `<p>电话那头沉默了一会儿。</p><p>“傻孩子……钱没了可以再挣，人没事就好。”</p><p>“妈给你转一千，先别饿着。以后再有人让你转钱，先给家里打个电话。”</p>`,
+          body: `<p>电话那头沉默了一会儿。</p><p>“傻孩子……钱没了可以再挣，人没事就好。”</p><p>“妈给你转六百，家里也不宽裕，先别饿着。以后再有人让你转钱，先给家里打个电话。”</p>`,
           buttons: [{ text: '嗯……谢谢妈', cls: 'primary' }]
         });
-        Game.money(+1000, '妈妈转账');
+        Game.money(+600, '妈妈转账');
         Game.mood(+20);
         S.flags.toldMom = true;
       } else {
@@ -96,16 +96,16 @@ const Events = {
     async policeRecover(S) {
       await modal({
         title: '📞 好消息', ava: Art.npc('👮', '#9ec5ff'),
-        body: `<p>“警方打掉了一个刷单诈骗团伙，追回了一部分赃款。”</p><p>“按比例，返还给你 <b>¥1,800</b>。证据保存得好，帮了大忙。”</p>`,
+        body: `<p>“警方打掉了一个刷单诈骗团伙，追回了一部分赃款。”</p><p>“按比例，返还给你 <b>¥1,000</b>。证据保存得好，帮了大忙。”</p>`,
         buttons: [{ text: '谢谢警察同志！', cls: 'primary' }]
       });
-      Game.money(+1800, '追回赃款');
+      Game.money(+1000, '追回赃款');
       Game.mood(+20);
     },
     async tutorUnlock(S) {
       await modal({
         title: '邻居王阿姨', ava: Art.npc('👩‍🦳', '#c49bff'),
-        body: `<p>“小伙子，听说你是学德语的？我家小宇明年要去德国读书。”</p><p>“每天晚上能不能来教他一会儿？课时费好商量！”</p>`,
+        body: `<p>“小伙子，听说你是学德语的？我家小宇明年要去德国读书。”</p><p>“单日的晚上能不能来教他一会儿？课时费好商量！”</p>`,
         buttons: [{ text: '当然可以！', cls: 'primary' }]
       });
       S.unlocked.tutor = true;
